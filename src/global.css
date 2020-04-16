@@ -1,0 +1,171 @@
+        html, body, .map {
+            height: 100%;
+            margin: 0px;
+        }
+		.cadInfo .cadNav {
+			min-height: 60px;
+		}
+		.cadInfo .cadNav .cadLeft {
+			float: left;
+			cursor: pointer;
+			padding-left: 3px;
+			color: #2372B9;
+			font-weight: bold;
+			font-size: large;
+		}
+		.cadInfo .cadNav .cadCount {
+			width: 75%;
+			padding: 0px 10px 0px 10px;
+			text-align: center;
+			float: left;
+		}
+		.cadInfo .cadNav .cadRight {
+			position: absolute;
+			right: 20px;
+			padding-right: 3px;
+			cursor: pointer;
+			color: #2372B9;
+			font-weight: bold;
+			font-size: large;
+		}
+		.cadInfo .featureCont {
+			min-height: 200px;
+			max-height: 200px;
+			overflow-y: auto;
+			margin-bottom: 16px;
+			text-align: center;
+		}
+		.cadInfo .operCont {
+			position: relative;
+			height: 34px;
+		}
+		.cadInfo .featureCont .first {
+			width: 100px;
+			font-weight: bold;
+		}
+
+		.cadInfo .featureCont td {
+			border-bottom: 1px solid #ddd;
+			height: 20px;
+			padding-left: 10px;
+			padding-right: 10px;
+		}
+		.cadInfo .featureCont table {
+			text-align: left;
+		}
+		.cadInfo .notVisible {
+			visibility: hidden;
+		}
+		.cadInfo button.ShowObject {
+			cursor: pointer;
+		}
+		.cadInfo .operCont a.export {
+			display: block;
+			position: absolute;
+			left: 145px;
+			top: -5px;
+			height: 26px;
+			width: 28px;
+			border: solid 1px #eee;
+			border-radius: 4px;
+			box-shadow: 0px 3px 4.7px 0.3px rgba(0, 0, 0, 0.24);
+		}
+		.cadInfo .operCont .export::after {
+			content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" focusable="false"><path d="M 18.29 9.65 H 14.69 V 4 H 9.31 V 9.65 H 5.71 L 12 16.24 Z M 5.71 18.12 V 20 H 18.29 V 18.12 H 5.71 Z"/></svg>');
+		}
+		
+		.pack.leaflet-control::before {
+			content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" focusable="false"><path d="M16.44,4H5.78A1.78,1.78,0,0,0,4,5.78V18.22A1.78,1.78,0,0,0,5.78,20H18.22A1.78,1.78,0,0,0,20,18.22V7.56ZM12,18.22a2.67,2.67,0,1,1,2.67-2.67A2.66,2.66,0,0,1,12,18.22Zm2.67-8.89H5.78V5.78h8.89V9.33Z"/></svg>');
+		}
+		.icon.leaflet-control:hover {
+			background-color: lightgray;
+		}
+		.icon.leaflet-control {
+			text-align: center;
+			width: 28px;
+			height: 28px;
+			border-radius: 4px;
+			background-color: rgb(255, 255, 255);
+			box-shadow: 0px 3px 4.7px 0.3px rgba(0, 0, 0, 0.24);
+			fill: #757575;
+			clear: none;
+			cursor: pointer;
+			display: block;
+			float: left;
+			margin-left: 13px;
+			position: relative;
+		}
+		.icon.leaflet-control .notVisible {
+			display: none;
+		}
+		.icon.pack .addedCont {
+			background-color: lightgray;
+			border-radius: 4px;
+			width: fit-content;
+			padding: 6px;
+		}
+		.icon.pack .addedCont textarea {
+			height: 130px;
+			width: 228px;
+		}
+.leaflet-gmx-fitcenter.leaflet-control {
+    border: 1px solid;
+	height: 30px;
+	z-index: 5000;
+}
+.leaflet-gmx-fitcenter .results.active {
+    padding: 8px 0;
+    border-top: 1px solid #c6c6c6;
+}
+.leaflet-gmx-fitcenter:hover .results {
+	display: block;
+}
+.leaflet-gmx-fitcenter .results > *:hover {
+	border: 1px solid #c6c6c6;
+	cursor: pointer;
+}
+.leaflet-gmx-fitcenter .results > * {
+    line-height: 24px;
+    padding: 0 8px;
+	margin: 0 6px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.leaflet-gmx-fitcenter.leaflet-control input {
+    /*
+	text-align: center;
+    background-color: lightgrey;
+	*/
+    vertical-align: top;
+    border-style: none;
+    text-indent: 10px;
+    text-overflow: ellipsis;
+	padding: 0px;
+	width: 300px;
+    height: 30px;
+}
+.leaflet-gmx-fitcenter.leaflet-control button {
+	cursor: pointer;
+    background-color: white;
+    border: 0;
+	outline: none;
+	padding: 0px;
+    height: 30px;
+}
+.leaflet-gmx-fitcenter.leaflet-control button:after {
+  	content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" focusable="false"><path d="M15.44 14.06h-.73l-.26-.25a6 6 0 1 0-.64.64l.25.26v.72L18.64 20 20 18.64zm-5.49 0a4.12 4.12 0 1 1 4.12-4.12 4.11 4.11 0 0 1-4.12 4.12z"></path></svg>');
+}
+.leaflet-gmx-fitcenter.leaflet-control .results {
+    background-color: white;
+	width: calc(100% + 2px);
+	left: -1px;
+	top: 29px;
+	border: 1px solid;
+	border-top: 1px solid #c6c6c6;
+	display: block;
+    text-align: left;
+    vertical-align: middle;
+	position: absolute;
+}
