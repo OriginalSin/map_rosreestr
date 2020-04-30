@@ -177,7 +177,8 @@ L.control.icon({
 		});
 		L.DomEvent.on(button1, 'click', ev1 => {
 			// console.log('click1', out , ev1)
-			fse.writeJSONSync('cad.geojson', out, {spaces: '\t'});
+			let name = fileName.value || 'cad.geojson';
+			fse.writeJSONSync(name, out, {spaces: '\t'});
 			// let tt = fse;
 			// let blob = new Blob([JSON.stringify(out, null, '\t')], {type: 'text/json;charset=utf-8;'});
 			// linkNode.setAttribute('href', window.URL.createObjectURL(blob));
