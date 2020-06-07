@@ -333,7 +333,8 @@ console.log('cad click', Dbase)
 			bounds = map.getPixelBounds(),
 			ne = map.options.crs.project(map.unproject(bounds.getTopRight())),
 			sw = map.options.crs.project(map.unproject(bounds.getBottomLeft())),
-			mInPixel = Math.pow(2, map.getZoom() + 8) / cad.worldWidthFull,
+			// mInPixel = Math.pow(2, map.getZoom() + 8) / cad.worldWidthFull,
+			mInPixel = Math.pow(2, 28) / cad.worldWidthFull,
 			exBounds = L.bounds(
 				L.point(attr.extent.xmin, attr.extent.ymin).multiplyBy(mInPixel),
 				L.point(attr.extent.xmax, attr.extent.ymax).multiplyBy(mInPixel)
@@ -349,6 +350,8 @@ console.log('cad click', Dbase)
 			full: (sw.x < attr.extent.xmin && ne.x > attr.extent.xmax) && (sw.y < attr.extent.ymin && ne.y > attr.extent.ymax),
 			id: attr.attrs.id,
 			type: attr.type,
+			mInPixel: mInPixel,
+			extent: attr.extent,
 			exSize: [Math.round(1 + exBounds.max.x - exBounds.min.x), Math.round(1 + exBounds.max.y - exBounds.min.y)],
 			exBbox: [attr.extent.xmin, attr.extent.ymin, attr.extent.xmax, attr.extent.ymax],
 			size: [bounds.max.x - bounds.min.x, bounds.max.y - bounds.min.y],
@@ -383,10 +386,10 @@ console.log('cad click', Dbase)
 		for (let key in params) {
 			imageUrl += '&' + key + '=' + params[key];
 		}
-		return imageUrl;
+		return {url: imageUrl, attr: attr};
 	},
 	_setOverlay1: function(feature, map, flagExternalGeo) {
-		let url = cad._getImageUrl(feature, map);
+		let {url, attr} = cad._getImageUrl(feature, map);
 		return fetch(url)
 			.then(req => req.blob())
 			.then(blob => {
@@ -403,15 +406,20 @@ console.log('cad click', Dbase)
 				canv.width = bitmap.width; canv.height = bitmap.height;
 				ctx.drawImage(bitmap, 0, 0, canv.width, canv.height);
 				let pathPoints = MSQR(ctx, {path2D: false, maxShapes: 10});
+				let cy = canv.height/2;
 				let center = map.latLngToContainerPoint(map.getCenter());
 				// console.log('pathPoints', pathPoints);
 				var rings = pathPoints.map(function (it) {
 					var ring = it.map(function (p) {
-						return L.point(p.x + center.x, p.y + center.y);
+						return L.point(p.x, canv.height - p.y)._divideBy(attr.mInPixel)._add({x: attr.extent.xmin, y: attr.extent.ymin});
+						// return L.point(p.x + center.x, p.y + center.y);
+				// crs.unproject(L.point(attr.extent.xmin, attr.extent.ymin).divideBy(R)),
+						// return L.point(attr.extent.xmin + p.x / attr.mInPixel, p.y).divideBy(R);
 					});
 					ring = L.LineUtil.simplify(ring, 1);
 					return ring.map(function (p) {
-						return map.containerPointToLatLng(p);
+						return L.Projection.SphericalMercator.unproject(p);
+						// return map.containerPointToLatLng(p);
 					});
 				});
 				var len = rings.length;

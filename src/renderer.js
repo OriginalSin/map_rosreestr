@@ -56,6 +56,7 @@ const objects = L.geoJSON([], {
 	Dbase.values().then(arr => {
 		// console.log('arr', arr);
 		target.addData(arr);
+	fse.writeJSONSync('cad.geojson', target.toGeoJSON(), {spaces: '\t'});
 		let bounds = L.bounds([]),
 			crs = L.Projection.SphericalMercator;
 		arr.forEach(it => {
@@ -67,6 +68,7 @@ const objects = L.geoJSON([], {
 			crs.unproject(bounds.max)
 		]);
 	});
+	
 }).bindPopup(function (layer) {
 	layer.bringToBack();
 	return cad._openPopup({feature: layer.feature.properties, map: map});
@@ -117,9 +119,9 @@ L.control.icon = function (options) {
 };
 
 const sp = '\
-77:07:0015007:40 \
-77:07:0015007:41 \
-77:07:0015007:42 \
+50:27:0020543:76 \
+50:27:0020543:96 \
+50:27:0020543:98 \
 ';
 // 77:07:0015007:40
 // 77:07:0015007:41
@@ -154,16 +156,16 @@ L.control.icon({
 		fileName.value = 'cad.geojson';
 		button.innerHTML = 'Выделить границы';
 		L.DomEvent.on(button, 'click', ev1 => {
-			let arr = textarea.value.trim().split(/[,\s+]/).reduce((p, c) => { 
-				if (c.trim()) { p.push(c); }
+			let items = textarea.value.trim().split(/[,\s+]/).reduce((p, c) => { 
+				if (c.trim()) { p[c] = true; }
 				return p;
-			}, []);
+			}, {});
 			
 // console.log('click', ev1)
 			button.classList.add('notVisible');
 			div1.classList.remove('notVisible');
 
-			cad.parseArr(arr, target._map).then(data => {
+			cad.parseArr(Object.keys(items), target._map).then(data => {
 				out = L.layerGroup(data.reduce((p, it) => {
 					if (it.err) {
 						console.log('Ошибка оцифровки для: ', it);
