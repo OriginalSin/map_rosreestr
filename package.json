@@ -47,6 +47,7 @@
     }
   },
   "dependencies": {
+    "@canvas/image": "^1.0.1",
     "@canvas/image-data": "^1.0.0",
     "blob-to-base64": "^1.0.2",
     "canvas": "^2.6.1",

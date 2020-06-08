@@ -1,22 +1,25 @@
-// var L = require('leaflet');
 var fse = require('fs-extra');
 const fetch = require("node-fetch");
-const ImageData = require('@canvas/image-data');
-const blobToBase64 = require('blob-to-base64');
-var FileReader = require('filereader');
-const { createCanvas, Image, createImageData, loadImage } = require('canvas');
+// const { Image, getImageData, imageFromBuffer, imageFromImageData } = require('@canvas/image')
+// const ImageData = require('@canvas/image-data');
+// const blobToBase64 = require('blob-to-base64');
+// var FileReader = require('filereader');
+const { createCanvas, createImageData, loadImage } = require('canvas');
 // import Dbase from './db.js';
 // var MSQR = require('./msqr.js');
 
 const proxy = 'https://pkk.rosreestr.ru/';
 const proxy1 = 'https://pkk5.kosmosnimki.ru/';
-// const popup = L.popup({ minWidth: 280 });
-// var window = {};
+
 var myArgs = process.argv.slice(2);
 if (myArgs.length < 2) {
 	console.error('Error use this format:', 'node cadPack.js inputFile outFile');
 } else {
-
+	var geoJsonFile = myArgs[1] + '.geojson';
+	var skipedFile = myArgs[1] + '.skiped';
+	if (fse.existsSync(geoJsonFile)) {
+	  console.log('Sorry file ', geoJsonFile, ' exists!')
+	} else {
 	var data = fse.readFileSync(myArgs[0], 'utf8');
 	var names = data.split('\n').reduce((p, c) => {
 		p[c.trim()] = true;
@@ -44,10 +47,6 @@ if (myArgs.length < 2) {
 			lat: (2 * Math.atan(Math.exp(point.y / r)) - (Math.PI / 2)) * d,
 			lng: point.x * d / r
 		};
-		// return new LatLng(
-			// (2 * Math.atan(Math.exp(point.y / r)) - (Math.PI / 2)) * d,
-			// point.x * d / r
-			// );
 	};
 	const _sqDist = function (p1, p2) {
 		var dx = p2.x - p1.x,
@@ -142,27 +141,16 @@ if (myArgs.length < 2) {
 		}
 
 		var sqTolerance = tolerance * tolerance;
-
-			// stage 1: vertex reduction
-			points = _reducePoints(points, sqTolerance);
-
-			// stage 2: Douglas-Peucker simplification
-			points = _simplifyDP(points, sqTolerance);
+		points = _reducePoints(points, sqTolerance);	// stage 1: vertex reduction
+		points = _simplifyDP(points, sqTolerance);	// stage 2: Douglas-Peucker simplification
 
 		return points;
 	}
 
-	const getImageUrl = function(it, bbox) {
+	const getImageUrl = function(it, bbox, exSize) {
 		let id = it.attrs.id,
 			extent = it.extent,
-			// bbox = [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-			exSize = [Math.round(1 + (bbox[2] - bbox[0]) * mInPixel), Math.round(1 + (bbox[3] - bbox[1]) * mInPixel)],
-			// exSize: [Math.round(1 + exBounds.max.x - exBounds.min.x), Math.round(1 + exBounds.max.y - exBounds.min.y)],
-				// L.point(attr.extent.xmax, attr.extent.ymax).multiplyBy(mInPixel)
-			// ),
 			type = it.type || 1,
-			// exportIcon = popup._exportIcon,
-			// layer = L.CadUtils.getCadastreLayer(id),
 			ids = [0, 1 , 2, 3, 4, 5, 6, 7, 8, 9, 10],
 			params = {
 				size: exSize.join(','),
@@ -183,81 +171,113 @@ if (myArgs.length < 2) {
 		for (let key in params) {
 			imageUrl += '&' + key + '=' + params[key];
 		}
+		// console.log('exSize', exSize, params);
 		return imageUrl;
 	};
 
 	var arr = Object.keys(names);
-	arr = arr.slice(arr.length - 14);
-	fse.appendFileSync(myArgs[1], '{\n\t"type": "FeatureCollection",\n\t"features": [\n\t\t', 'utf8');
+	// arr = arr.slice(arr.length - 114);
+	// arr = ['50:27:0020543:29'];
+	// fse.writeFileSync(skipedFile, '\n', 'utf8');
+	fse.writeFileSync(geoJsonFile, '{\n\t"type": "FeatureCollection",\n\t"features":\n\t\t[\n\t\t', 'utf8');
 	const getNext = function() {
-		let cn = getIdByCn(arr.shift());
+		let cnn = arr.shift();
+		let cn = getIdByCn(cnn);
 		if (cn) {
 			getFeature(cn).then(json => {
 				let feature = json.feature;
+				if (!feature) {
+					fse.appendFileSync(skipedFile, cn + '\n', 'utf8');
+					console.log('skiped', cnn, feature);
+					getNext();
+				} else {
 	// console.log('feature', feature.attrs);
 				let id = feature.attrs.id,
 					extent = feature.extent,
 					bbox = [extent.xmin, extent.ymin, extent.xmax, extent.ymax],
-					exSize = [Math.round(1 + (bbox[2] - bbox[0]) * mInPixel), Math.round(1 + (bbox[3] - bbox[1]) * mInPixel)],
-					url = getImageUrl(feature, bbox);
+					w = Math.round((bbox[2] - bbox[0]) * mInPixel),
+					h = Math.round((bbox[3] - bbox[1]) * mInPixel);
+				if (w % 2) { w++; }
+				if (h % 2) { h++; }
+				let exSize = [w, h],
+					url = getImageUrl(feature, bbox, exSize);
 				fetch(url)
 					.then(req => req.arrayBuffer())
 					.then(blob => {
 						var array = new Uint8ClampedArray(blob);
-						var iData = createImageData(array, exSize[0]);
-						const canv = createCanvas(exSize[0], exSize[1]);
-						var ctx = canv.getContext('2d');
-						ctx.putImageData(iData, 0, 0);
-  // console.log('blob', exSize[0], blob, tt)
-						let pathPoints = MSQR(ctx, {path2D: false, maxShapes: 10});
-						
-  // console.log('blob', exSize[0], exSize[1], 4 * exSize[0] * exSize[1], array, pathPoints)
-						
-						var rings = pathPoints.map(function (it) {
-							var ring = it.map(function (p) {
-								return {
-									x: extent.xmin + p.x / mInPixel,
-									y: extent.ymin + (exSize[1] - p.y)/ mInPixel
-								};
-								// return L.point(p.x, exSize[1] - p.y)._divideBy(attr.mInPixel)._add({x: attr.extent.xmin, y: attr.extent.ymin});
-							});
-							ring = simplify(ring, 1);
-							return ring.map(function (p) {
-								return unproject(p);
-								// return map.containerPointToLatLng(p);
-							});
-						});
-  console.log('rings', rings.length)
-						var len = rings.length;
-						if (len) {
-							var type = 'Polygon',
-								coords = rings.map(function (ring) {
-									return ring.map(function (latlng) {
-										return [latlng.lng, latlng.lat];
-									});
-								});
-							if (len > 1) {
-								type = 'Multi' + type;
-								coords = [coords];
-							}
-							let _geoFson = {
-								geometry: { type: type, coordinates: coords },
-								type: 'Feature',
-								properties: feature
-							};
-							fse.appendFileSync(myArgs[1], JSON.stringify(_geoFson) + (arr.length ? ',' : '') + '\n\t\t', 'utf8');
-						}
+						if (array[0] === 137) {
+// console.log('blob', array[0], array.length, array.width, array.height, w, h, w * h * 4)
+						fse.writeFileSync('./test1.png', array);
 
-						// fse.appendFileSync(myArgs[1], JSON.stringify(json) + '\n\t\t', 'utf8');
+						loadImage('./test1.png').then((image) => {
+							const canv = createCanvas(w, h);
+							var ctx = canv.getContext('2d');
+							ctx.drawImage(image, 0, 0, canv.width, canv.height);
+							// const buffer = canv.toBuffer('image/png');
+							// fse.writeFileSync('./test.png', buffer);
+
+							let pathPoints = MSQR(ctx, {path2D: false, maxShapes: 10});
+							
+	  // console.log('blob', pathPoints.length, pathPoints)
+							
+							var rings = pathPoints.map(function (it) {
+								var ring = it.map(function (p) {
+									return {
+										x: extent.xmin + p.x / mInPixel,
+										y: extent.ymin + (exSize[1] - p.y)/ mInPixel
+									};
+									// return L.point(p.x, exSize[1] - p.y)._divideBy(attr.mInPixel)._add({x: attr.extent.xmin, y: attr.extent.ymin});
+								});
+								ring = simplify(ring, 1);
+								return ring.map(function (p) {
+									return unproject(p);
+									// return map.containerPointToLatLng(p);
+								});
+							});
+	  console.log('rings', rings.length, 'for', id);
+							var len = rings.length;
+							if (len) {
+								var type = 'Polygon',
+									coords = rings.map(function (ring) {
+										return ring.map(function (latlng) {
+											return [latlng.lng, latlng.lat];
+										});
+									});
+								if (len > 1) {
+									type = 'Multi' + type;
+									coords = [coords];
+								}
+								let _geoFson = {
+									geometry: { type: type, coordinates: coords },
+									type: 'Feature',
+									properties: feature
+								};
+								let out = JSON.stringify(_geoFson);
+								if (arr.length) {
+									out += ',\n\t\t';
+								} else {
+									out += '\n]\n}';
+								}
+								fse.appendFileSync(geoJsonFile, out, 'utf8');
+							}
+
+							// fse.appendFileSync(geoJsonFile, JSON.stringify(json) + '\n\t\t', 'utf8');
+						});
+						} else {
+							fse.appendFileSync(skipedFile, id + '\n', 'utf8');
+							console.log('skiped', id);
+						}
 						getNext();
 					});
+				}
 			});
 		} else {
-			fse.appendFileSync(myArgs[1], ']\n}', 'utf8');
+			fse.appendFileSync(skipedFile, cnn + '\n', 'utf8');
+			console.log('skiped', cnn);
 		}
 	};
 	getNext();
-
+	}
 }
 /*eslint-disable */
 /*!
