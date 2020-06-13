@@ -56,7 +56,6 @@ const objects = L.geoJSON([], {
 	Dbase.values().then(arr => {
 		// console.log('arr', arr);
 		target.addData(arr);
-	fse.writeJSONSync('cad.geojson', target.toGeoJSON(), {spaces: '\t'});
 		let bounds = L.bounds([]),
 			crs = L.Projection.SphericalMercator;
 		arr.forEach(it => {
@@ -68,7 +67,6 @@ const objects = L.geoJSON([], {
 			crs.unproject(bounds.max)
 		]);
 	});
-	
 }).bindPopup(function (layer) {
 	layer.bringToBack();
 	return cad._openPopup({feature: layer.feature.properties, map: map});
@@ -119,9 +117,9 @@ L.control.icon = function (options) {
 };
 
 const sp = '\
-50:27:0020543:76 \
-50:27:0020543:96 \
-50:27:0020543:98 \
+77:07:0015007:40 \
+77:07:0015007:41 \
+77:07:0015007:42 \
 ';
 // 77:07:0015007:40
 // 77:07:0015007:41

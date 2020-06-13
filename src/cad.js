@@ -406,20 +406,15 @@ console.log('cad click', Dbase)
 				canv.width = bitmap.width; canv.height = bitmap.height;
 				ctx.drawImage(bitmap, 0, 0, canv.width, canv.height);
 				let pathPoints = MSQR(ctx, {path2D: false, maxShapes: 10});
-				let cy = canv.height/2;
 				let center = map.latLngToContainerPoint(map.getCenter());
 				// console.log('pathPoints', pathPoints);
 				var rings = pathPoints.map(function (it) {
 					var ring = it.map(function (p) {
 						return L.point(p.x, canv.height - p.y)._divideBy(attr.mInPixel)._add({x: attr.extent.xmin, y: attr.extent.ymin});
-						// return L.point(p.x + center.x, p.y + center.y);
-				// crs.unproject(L.point(attr.extent.xmin, attr.extent.ymin).divideBy(R)),
-						// return L.point(attr.extent.xmin + p.x / attr.mInPixel, p.y).divideBy(R);
 					});
 					ring = L.LineUtil.simplify(ring, 1);
 					return ring.map(function (p) {
 						return L.Projection.SphericalMercator.unproject(p);
-						// return map.containerPointToLatLng(p);
 					});
 				});
 				var len = rings.length;
