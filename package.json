@@ -47,18 +47,12 @@
     }
   },
   "dependencies": {
-    "@canvas/image": "^1.0.1",
-    "@canvas/image-data": "^1.0.0",
-    "blob-to-base64": "^1.0.2",
-    "canvas": "^2.6.1",
     "electron-compile": "^6.4.4",
     "electron-squirrel-startup": "^1.0.0",
     "filereader": "^0.10.3",
     "fs-extra": "^9.0.0",
     "idb": "^5.0.1",
-    "image-downloader": "^3.4.2",
-    "leaflet": "^1.5.1",
-    "node-fetch": "^2.6.0"
+    "leaflet": "^1.5.1"
   },
   "devDependencies": {
     "babel-plugin-transform-async-to-generator": "^6.24.1",
